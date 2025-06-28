@@ -1,0 +1,842 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SYNTHERIA: Immersive Business Plan</title>
+    <!-- Chosen Palette: Ethereum Horizon (inspired by Ethereum blues: #627EEA, #4A5FCF with warm neutrals #F8F7F4, #FFFFFF, #2D3748) -->
+    <!-- Application Structure Plan: The site is structured as a thematic, single-page immersive document to facilitate a cohesive narrative and dynamic exploration. It progresses through five key sections:
+        1.  **Welcome & Vision (Hero):** An impactful introduction with subtle background animation to immediately convey brand identity and core purpose.
+        2.  **The Core Mechanism (Model)::** A visual, scroll-triggered sequence explaining the passive revenue generation cycle from staking, designed for intuitive understanding of complex blockchain processes.
+        3.  **Financial Momentum (Opportunity):** An interactive data dashboard centered around a financial calculator and dynamic chart, allowing users to actively explore revenue projections and understand key drivers. This section empowers direct engagement with the financial model.
+        4.  **Strategic Horizon (Strategy):** A vertical timeline with reveal animations, breaking down the long-term corporate roadmap into digestible, sequential phases, emphasizing systematic growth.
+        5.  **Fortifying the Future (Risks):** Interactive flip-cards for risk assessment, providing a clean, on-demand display of challenges and their mitigations, promoting comprehensive understanding without information overload.
+        This structure prioritizes user engagement through interactive elements and scroll-driven narratives, making the complex business plan consumable and memorable, reflecting modern academic consensus on effective information delivery. -->
+    <!-- Visualization & Content Choices: 
+        - **Welcome & Vision (Hero):** Large, bold typography with multiple subtly animated background elements (pure CSS `div`s) creating a parallax-like effect on mouse movement and gentle independent motion on scroll. Goal: Inform/Engage. Method: HTML/CSS. Interaction: Enhanced subtle parallax background movement. Justification: Sets an immediate immersive tone and adds visual depth.
+        - **The Core Mechanism (Model):** Abstract, animated flow diagram using HTML `div` elements and CSS `transform` properties. Each step, including connecting arrows, is revealed with a staggered fade-in and subtle slide-up effect using JavaScript's `IntersectionObserver`. Goal: Organize/Inform. Method: HTML/CSS with JS animation. Interaction: Enhanced scroll-triggered reveals for all elements, including connectors. Justification: Visually simplifies complex process, enhances clarity through guided, dynamic revelation.
+        - **Financial Momentum (Opportunity):** Interactive sliders for input variables (investment, ETH price, yield) directly connected to real-time calculations and a dynamic bar chart. Key metric cards also have subtle entry animations. Chart.js (Canvas) is used for the visualization. Goal: Analyze/Explore. Method: HTML forms/JS calculations/Chart.js. Interaction: User input directly impacts data visualization; key data points animate into view. Justification: Transforms static projections into a powerful, exploratory tool, with visual emphasis on results.
+        - **Strategic Horizon (Strategy):** Vertical timeline composed of HTML `div` elements. The central timeline line dynamically "grows" from bottom up on scroll, and each timeline item, including its visual marker, uses `IntersectionObserver` to trigger a fade-in/slide-in animation as it enters the viewport. Abstract geometric shapes replace emojis for visual markers. Goal: Organize/Inform. Method: HTML/CSS with JS animation. Interaction: Scroll-triggered content reveals, dynamic timeline line growth. Justification: Improves readability of long-term plans, creates a stronger sense of progression and visual narrative.
+        - **Fortifying the Future (Risks):** Interactive "flip" cards (HTML/CSS `transform: rotateY`) with text for risk and mitigation. Each card now also fades in and slightly scales up as it becomes visible on scroll, before it's flipped. Goal: Compare/Inform. Method: HTML/CSS with JS click event and scroll animation. Interaction: Click to reveal mitigation, combined with entrance animation. Justification: Efficiently presents paired information, enhances visual appeal and engagement upon section entry.
+        - **Contact Section:** Designed as a conceptual form within the single HTML file, providing input fields for user convenience. The 'Send Email' button uses a `mailto:` link to pre-fill the company email and subject/body, providing a direct, working contact method without requiring server-side processing. Goal: Action/Contact. Method: HTML forms, `mailto:` link with JS. Interaction: User fills form, clicks to send via their email client. Justification: Offers a structured interaction for contacting the company within the constraints of a static site.
+        - **Emblem/Logo:** Pure HTML/CSS elements (stacked `div`s with borders and rotations) to create an abstract, multi-layered geometric mark in the Ethereum color palette. Goal: Branding/Identity. Method: HTML/CSS. Justification: Aligns with specified art style, avoids external assets, scalable.
+
+    -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Montserrat:wght@700;800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #F8F7F4; /* Warm Neutral Background */
+            color: #2D3748; /* Dark Grey for Text */
+            scroll-behavior: smooth;
+            overflow-x: hidden; /* Prevent horizontal scrolling */
+        }
+        h1, h2 {
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 800;
+        }
+        .nav-link {
+            transition: all 0.3s ease;
+            position: relative;
+        }
+        .nav-link:after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 2px;
+            display: block;
+            margin-top: 5px;
+            right: 0;
+            background: #627EEA; /* Ethereum Blue Accent */
+            transition: width 0.3s ease;
+            -webkit-transition: width 0.3s ease;
+        }
+        .nav-link:hover:after {
+            width: 100%;
+            left: 0;
+            background-color: #627EEA;
+        }
+        .nav-link.active:after {
+             width: 100%;
+            left: 0;
+            background-color: #627EEA;
+        }
+        .card {
+            background-color: #ffffff;
+            border: 1px solid #E2E8F0; /* Light Grey Border */
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+        .timeline-item-header-marker {
+            background-color: #627EEA;
+            color: #ffffff;
+            font-weight: 600;
+            border-radius: 9999px; /* Full rounded for pill shape */
+            padding: 0.25rem 1rem;
+            display: inline-block;
+        }
+        .timeline-point {
+            position: absolute;
+            width: 1rem;
+            height: 1rem;
+            border-radius: 50%;
+            background-color: #627EEA;
+            left: -0.5rem; /* Center on the border */
+            top: 0.25rem; /* Adjust to align with text */
+            z-index: 10;
+            opacity: 0; /* Hidden initially */
+            transform: scale(0); /* Hidden initially */
+            transition: opacity 0.4s ease-out, transform 0.4s ease-out;
+        }
+        .timeline-point.is-visible {
+            opacity: 1;
+            transform: scale(1);
+        }
+        .timeline-line-container {
+            position: absolute;
+            height: 100%;
+            left: 1.5rem;
+            /* Using md:left-1/2 for responsiveness directly in Tailwind, keeping it here for clarity */
+            top: 0;
+            width: 2px;
+            background-color: #E2E8F0;
+            transform-origin: top;
+            transform: scaleY(0); /* Starts hidden */
+            transition: transform 1.5s ease-out; /* Slower animation for the line */
+        }
+        .timeline-line-container.is-visible {
+            transform: scaleY(1); /* Grows to full height */
+        }
+        .risk-card-inner {
+            transform-style: preserve-3d;
+            transition: transform 0.6s;
+        }
+        .risk-card.flipped .risk-card-inner {
+            transform: rotateY(180deg);
+        }
+        .risk-card-front, .risk-card-back {
+            -webkit-backface-visibility: hidden;
+            backface-visibility: hidden;
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 1.5rem;
+            border-radius: 0.5rem;
+            border: 1px solid #E2E8F0;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+        }
+        .risk-card-back {
+            transform: rotateY(180deg);
+            background-color: #2D3748; /* Dark background for back of card */
+            color: #ffffff;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 800px; /* Max width for readability */
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px; /* Base height for mobile */
+            max-height: 400px; /* Max height to prevent excessive size */
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 400px; /* Taller on desktop */
+            }
+        }
+
+        /* SYNTHERIA Emblem/Logo Styles */
+        .syntheria-logo-container {
+            position: relative;
+            width: 28px; /* Standard size for header */
+            height: 28px;
+            margin-right: 8px; /* Spacing for logo text */
+            transform: rotate(45deg); /* Initial rotation for diamond shape */
+        }
+        .syntheria-logo-diamond {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border: 3px solid #627EEA; /* Primary Ethereum blue */
+            border-radius: 3px;
+            box-shadow: 0 0 8px rgba(98, 126, 234, 0.5); /* Subtle glow */
+        }
+        .syntheria-logo-inner-diamond {
+            position: absolute;
+            width: 70%;
+            height: 70%;
+            top: 15%;
+            left: 15%;
+            border: 2px solid #4A5FCF; /* Secondary Ethereum blue */
+            border-radius: 2px;
+            opacity: 0.8;
+            transform: rotate(0deg); /* Relative rotation */
+        }
+        .syntheria-logo-core {
+            position: absolute;
+            width: 30%;
+            height: 30%;
+            top: 35%;
+            left: 35%;
+            background-color: #627EEA;
+            border-radius: 1px;
+            opacity: 0.6;
+        }
+
+        /* Scroll Animation Base Styles */
+        .animate-on-scroll {
+            opacity: 0;
+            transform: translateY(20px) scale(0.98); /* Slight scale for pop-in */
+            transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+        }
+        .animate-on-scroll.is-visible {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+        .animate-on-scroll[data-delay="0.1"] { transition-delay: 0.1s; }
+        .animate-on-scroll[data-delay="0.2"] { transition-delay: 0.2s; }
+        .animate-on-scroll[data-delay="0.3"] { transition-delay: 0.3s; }
+        .animate-on-scroll[data-delay="0.4"] { transition-delay: 0.4s; }
+        .animate-on-scroll[data-delay="0.5"] { transition-delay: 0.5s; }
+        .animate-on-scroll[data-delay="0.6"] { transition-delay: 0.6s; }
+        .animate-on-scroll[data-delay="0.7"] { transition-delay: 0.7s; }
+        .animate-on-scroll[data-delay="0.8"] { transition-delay: 0.8s; }
+        .animate-on-scroll[data-delay="0.9"] { transition-delay: 0.9s; }
+        .animate-on-scroll[data-delay="1.0"] { transition-delay: 1.0s; }
+
+        /* Model section arrows animation */
+        .model-arrow {
+            opacity: 0;
+            transform: rotate(90deg) scaleX(0); /* Start hidden and scaled to 0 width */
+            transform-origin: left center; /* Animate from left */
+            transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+        }
+        .model-arrow.is-visible {
+            opacity: 1;
+            transform: rotate(90deg) scaleX(1); /* Animate to full width */
+        }
+        @media (min-width: 768px) {
+            .model-arrow {
+                transform: rotate(0deg) scaleX(0); /* Horizontal for desktop */
+            }
+            .model-arrow.is-visible {
+                transform: rotate(0deg) scaleX(1);
+            }
+        }
+
+        /* Hero section specific parallax-like effect */
+        .hero-background-element {
+            position: absolute;
+            background: linear-gradient(135deg, rgba(98, 126, 234, 0.1), rgba(74, 95, 207, 0.1));
+            border-radius: 50%;
+            z-index: -1;
+            /* Base transform to center, plus subtle independent animation */
+            transition: transform 0.1s linear, background 0.8s ease-in-out; /* Added background transition */
+        }
+        .hero-orb-1 {
+            width: 150%;
+            height: 150%;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) rotate(0deg) scale(1);
+            animation: orbPulse 8s infinite alternate ease-in-out; /* Independent animation */
+        }
+        .hero-orb-2 {
+            width: 100%;
+            height: 100%;
+            top: 20%;
+            left: 10%;
+            transform: translate(-50%, -50%) rotate(0deg) scale(1);
+            animation: orbRotate 12s infinite linear; /* Independent animation */
+        }
+        .hero-orb-3 {
+            width: 120%;
+            height: 120%;
+            bottom: 10%;
+            right: 5%;
+            transform: translate(-50%, -50%) rotate(0deg) scale(1);
+            animation: orbFloat 10s infinite alternate ease-in-out; /* Independent animation */
+        }
+
+        @keyframes orbPulse {
+            0% { transform: translate(-50%, -50%) scale(1); }
+            100% { transform: translate(-50%, -50%) scale(1.05); }
+        }
+        @keyframes orbRotate {
+            0% { transform: translate(-50%, -50%) rotate(0deg); }
+            100% { transform: translate(-50%, -50%) rotate(360deg); }
+        }
+        @keyframes orbFloat {
+            0% { transform: translate(-50%, -50%) translateY(0px) rotate(0deg); }
+            50% { transform: translate(-50%, -50%) translateY(10px) rotate(5deg); }
+            100% { transform: translate(-50%, -50%) translateY(0px) rotate(0deg); }
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <header id="header" class="bg-white/80 backdrop-blur-md sticky top-0 z-50 shadow-sm">
+        <nav class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <div class="flex items-center">
+                <div class="syntheria-logo-container">
+                    <div class="syntheria-logo-diamond"></div>
+                    <div class="syntheria-logo-inner-diamond"></div>
+                    <div class="syntheria-logo-core"></div>
+                </div>
+                <div class="text-2xl font-bold text-gray-800">
+                    <span class="text-[#627EEA]">SYN</span>THERIA
+                </div>
+            </div>
+            <div class="hidden md:flex space-x-8">
+                <a href="#model" class="nav-link text-gray-600 hover:text-gray-900 font-medium">The Model</a>
+                <a href="#opportunity" class="nav-link text-gray-600 hover:text-gray-900 font-medium">Opportunity</a>
+                <a href="#strategy" class="nav-link text-gray-600 hover:text-gray-900 font-medium">Strategy</a>
+                <a href="#risks" class="nav-link text-gray-600 hover:text-gray-900 font-medium">Risks</a>
+                <a href="#contact" class="bg-[#627EEA] text-white px-4 py-2 rounded-lg hover:bg-opacity-90 transition-colors">Contact</a>
+            </div>
+            <div class="md:hidden">
+                <button id="mobile-menu-button" class="text-gray-800 focus:outline-none">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
+                </button>
+            </div>
+        </nav>
+        <div id="mobile-menu" class="hidden md:hidden">
+            <a href="#model" class="block py-2 px-4 text-sm text-gray-600 hover:bg-gray-100">The Model</a>
+            <a href="#opportunity" class="block py-2 px-4 text-sm text-gray-600 hover:bg-gray-100">Opportunity</a>
+            <a href="#strategy" class="block py-2 px-4 text-sm text-gray-600 hover:bg-gray-100">Strategy</a>
+            <a href="#risks" class="block py-2 px-4 text-sm text-gray-600 hover:bg-gray-100">Risks</a>
+            <a href="#contact" class="block py-2 px-4 text-sm text-white bg-[#627EEA] hover:bg-opacity-90">Contact</a>
+        </div>
+    </header>
+
+    <main>
+        <section id="hero" class="relative py-20 md:py-32 bg-white overflow-hidden">
+            <div class="hero-background-element hero-orb-1"></div>
+            <div class="hero-background-element hero-orb-2"></div>
+            <div class="hero-background-element hero-orb-3"></div>
+            <div class="container mx-auto px-6 text-center relative z-10">
+                <h1 class="text-4xl md:text-6xl font-bold text-gray-800 mb-4 leading-tight animate-on-scroll" data-delay="0.1">Forging Wealth from the Blockchain's Core</h1>
+                <p class="text-lg md:text-xl text-gray-600 max-w-3xl mx-auto mb-8 animate-on-scroll" data-delay="0.2">SYNTHERIA is a private corporation building a substantial reserve of Ethereum to generate stable, independent revenue by securing the network itself. No sales cycles, no maintenance costs, just pure, passive yield from the heart of the blockchain.</p>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-4xl mx-auto text-left">
+                    <div class="bg-[#F8F7F4] p-6 rounded-lg animate-on-scroll" data-delay="0.3">
+                        <h3 class="font-bold text-xl text-gray-800 mb-2">Funding Goal</h3>
+                        <p class="text-3xl font-bold text-[#627EEA]">CAD $100,000</p>
+                        <p class="text-sm text-gray-500">To establish our foundational ETH reserve.</p>
+                    </div>
+                    <div class="bg-[#F8F7F4] p-6 rounded-lg animate-on-scroll" data-delay="0.4">
+                        <h3 class="font-bold text-xl text-gray-800 mb-2">Revenue Source</h3>
+                        <p class="text-3xl font-bold text-[#627EEA]">ETH Staking</p>
+                        <p class="text-sm text-gray-500">Passive yield from network security.</p>
+                    </div>
+                    <div class="bg-[#F8F7F4] p-6 rounded-lg animate-on-scroll" data-delay="0.5">
+                        <h3 class="font-bold text-xl text-gray-800 mb-2">Core Mission</h3>
+                        <p class="text-lg font-semibold text-gray-700">Build a private ETH reserve to generate stable, self-sustaining revenue.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="model" class="py-20">
+            <div class="container mx-auto px-6">
+                <div class="text-center mb-12 animate-on-scroll">
+                    <h2 class="text-3xl md:text-4xl font-bold text-gray-800">The Revenue Engine: Simple & Stable</h2>
+                    <p class="mt-4 text-lg text-gray-600 max-w-2xl mx-auto">This section visually explains our unique business model. We generate revenue directly from the Ethereum network by securing it, creating a powerful, self-sustaining cycle of growth that's independent of traditional sales cycles.</p>
+                </div>
+                <div class="flex flex-col md:flex-row items-center justify-center space-y-8 md:space-y-0 md:space-x-8">
+                    <div class="text-center p-6 rounded-lg card w-64 animate-on-scroll" data-delay="0.1">
+                        <div class="text-4xl mb-3 text-[#627EEA]">◆</div> <!-- Abstract geometric icon -->
+                        <h3 class="font-bold text-lg">1. Initial Funding</h3>
+                        <p class="text-sm text-gray-600">Secure capital to purchase our foundational ETH reserve.</p>
+                    </div>
+                    <div class="text-2xl text-gray-400 font-bold transform rotate-90 md:rotate-0 model-arrow animate-on-scroll" data-delay="0.2">→</div>
+                    <div class="text-center p-6 rounded-lg card w-64 animate-on-scroll" data-delay="0.3">
+                        <div class="text-4xl mb-3 text-[#627EEA]">⬣</div> <!-- Abstract geometric icon -->
+                        <h3 class="font-bold text-lg">2. Acquire & Stake ETH</h3>
+                        <p class="text-sm text-gray-600">Our capital is converted into ETH and locked to help validate and secure the network.</p>
+                    </div>
+                    <div class="text-2xl text-gray-400 font-bold transform rotate-90 md:rotate-0 model-arrow animate-on-scroll" data-delay="0.4">→</div>
+                    <div class="text-center p-6 rounded-lg card w-64 animate-on-scroll" data-delay="0.5">
+                        <div class="text-4xl mb-3 text-[#627EEA]">▰</div> <!-- Abstract geometric icon -->
+                        <h3 class="font-bold text-lg">3. Earn Passive Yield</h3>
+                        <p class="text-sm text-gray-600">The network rewards us with new ETH for our contribution. This is our stable revenue.</p>
+                    </div>
+                    <div class="text-2xl text-gray-400 font-bold transform rotate-90 md:rotate-0 model-arrow animate-on-scroll" data-delay="0.6">→</div>
+                    <div class="text-center p-6 rounded-lg card w-64 animate-on-scroll" data-delay="0.7">
+                        <div class="text-4xl mb-3 text-[#627EEA]">⬡</div> <!-- Abstract geometric icon -->
+                        <h3 class="font-bold text-lg">4. Reinvest & Grow</h3>
+                        <p class="text-sm text-gray-600">Revenue is reinvested to buy more ETH, compounding our staking power and future earnings.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="opportunity" class="py-20 bg-white">
+            <div class="container mx-auto px-6">
+                <div class="text-center mb-12 animate-on-scroll">
+                    <h2 class="text-3xl md:text-4xl font-bold text-gray-800">Explore the Financial Momentum</h2>
+                    <p class="mt-4 text-lg text-gray-600 max-w-3xl mx-auto">Our financial model is designed for consistent growth. This interactive tool allows you to dynamically explore how changes in initial investment, prevailing ETH prices, and network staking yields directly impact our projected revenue over time. Engage with the sliders to visualize the compounding effect on our corporate ETH reserve and its generated income.</p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8 animate-on-scroll" data-delay="0.1">
+                    <div>
+                        <label for="investmentSlider" class="font-medium text-gray-700">Initial Investment (CAD)</label>
+                        <input id="investmentSlider" type="range" min="50000" max="500000" step="10000" value="100000" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer">
+                        <div class="text-center font-bold text-lg text-[#627EEA] mt-2" id="investmentValue">$100,000</div>
+                    </div>
+                    <div>
+                        <label for="ethPriceSlider" class="font-medium text-gray-700">ETH Price (CAD)</label>
+                        <input id="ethPriceSlider" type="range" min="2000" max="10000" step="100" value="4700" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer">
+                        <div class="text-center font-bold text-lg text-[#627EEA] mt-2" id="ethPriceValue">$4,700</div>
+                    </div>
+                    <div>
+                        <label for="yieldSlider" class="font-medium text-gray-700">Annual Staking Yield (%)</label>
+                        <input id="yieldSlider" type="range" min="1" max="10" step="0.1" value="3.5" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer">
+                        <div class="text-center font-bold text-lg text-[#627EEA] mt-2" id="yieldValue">3.5%</div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12 text-center">
+                    <div class="p-6 bg-gray-50 rounded-lg animate-on-scroll" data-delay="0.3">
+                        <h4 class="text-gray-500 font-semibold">ETH Acquired</h4>
+                        <p id="ethAcquired" class="text-3xl font-bold text-gray-800">21.28 ETH</p>
+                    </div>
+                    <div class="p-6 bg-gray-50 rounded-lg animate-on-scroll" data-delay="0.4">
+                        <h4 class="text-gray-500 font-semibold">Year 1 Revenue (CAD)</h4>
+                        <p id="year1Revenue" class="text-3xl font-bold text-gray-800">$3,478</p>
+                    </div>
+                    <div class="p-6 bg-gray-50 rounded-lg animate-on-scroll" data-delay="0.5">
+                        <h4 class="text-gray-500 font-semibold">Year 5 Revenue (CAD)</h4>
+                        <p id="year5Revenue" class="text-3xl font-bold text-gray-800">$4,163</p>
+                    </div>
+                </div>
+
+                <div class="chart-container animate-on-scroll" data-delay="0.6">
+                    <canvas id="revenueChart"></canvas>
+                </div>
+            </div>
+        </section>
+
+        <section id="strategy" class="py-20">
+            <div class="container mx-auto px-6">
+                <div class="text-center mb-12 animate-on-scroll">
+                    <h2 class="text-3xl md:text-4xl font-bold text-gray-800">Our Strategic Horizon</h2>
+                    <p class="mt-4 text-lg text-gray-600 max-w-2xl mx-auto">This dynamic roadmap outlines our methodical approach to building SYNTHERIA into a highly capitalized private corporation. Each phase is a distinct step, systematically progressing from foundational setup to significant asset growth and potential future strategic evolutions. Scroll through to observe our journey.</p>
+                </div>
+                <div class="max-w-4xl mx-auto relative pl-6 md:pl-0">
+                    <div class="timeline-line-container absolute h-full left-[1.5rem] md:left-1/2 md:-ml-px top-0"></div>
+
+                    <div class="timeline-item flex flex-col md:flex-row mb-12">
+                        <div class="md:w-1/2 md:text-right md:pr-8 mb-4 md:mb-0 relative">
+                            <span class="timeline-item-header-marker animate-on-scroll" data-delay="0.1">Phase 1</span>
+                            <h3 class="font-bold text-xl text-gray-800 mt-2 animate-on-scroll" data-delay="0.2">Short-Term (0-18 Mo)</h3>
+                            <div class="timeline-point hidden md:block md:absolute md:left-full md:transform md:-translate-x-1/2 md:top-1/2 md:-translate-y-1/2 animate-on-scroll" data-delay="0.3"></div>
+                        </div>
+                        <div class="md:w-1/2 md:pl-8 text-gray-700 relative">
+                            <div class="timeline-point md:hidden animate-on-scroll" data-delay="0.3"></div>
+                            <ul class="list-disc list-inside space-y-2 animate-on-scroll" data-delay="0.4">
+                                <li>Secure CAD $100,000 seed funding to establish our core ETH reserve.</li>
+                                <li>Acquire foundational ETH and immediately begin staking to initiate revenue generation.</li>
+                                <li>Establish and audit a secure, robust validator infrastructure for our private holdings.</li>
+                                <li>Ensure full regulatory compliance as a private entity.</li>
+                                <li>Systematically reinvest early returns to accelerate ETH reserve growth.</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="timeline-item flex flex-col md:flex-row-reverse mb-12">
+                        <div class="md:w-1/2 md:text-left md:pl-8 mb-4 md:mb-0 relative">
+                            <span class="timeline-item-header-marker animate-on-scroll" data-delay="0.1">Phase 2</span>
+                            <h3 class="font-bold text-xl text-gray-800 mt-2 animate-on-scroll" data-delay="0.2">Medium-Term (3-5 Yr)</h3>
+                            <div class="timeline-point hidden md:block md:absolute md:right-full md:transform md:translate-x-1/2 md:top-1/2 md:-translate-y-1/2 animate-on-scroll" data-delay="0.3"></div>
+                        </div>
+                        <div class="md:w-1/2 md:pr-8 text-gray-700 relative">
+                            <div class="timeline-point md:hidden animate-on-scroll" data-delay="0.3"></div>
+                            <ul class="list-disc list-inside space-y-2 animate-on-scroll" data-delay="0.4">
+                                <li>Significantly grow the corporate ETH reserve through aggressive reinvestment.</li>
+                                <li>Optimize validator operations and infrastructure to maximize yield and efficiency.</li>
+                                <li>Potentially explore offering network-securing services to select external clients.</li>
+                                <li>Solidify the stability and independence of our sales-free revenue model.</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="timeline-item flex flex-col md:flex-row mb-12">
+                        <div class="md:w-1/2 md:text-right md:pr-8 mb-4 md:mb-0 relative">
+                            <span class="timeline-item-header-marker animate-on-scroll" data-delay="0.1">Phase 3</span>
+                            <h3 class="font-bold text-xl text-gray-800 mt-2 animate-on-scroll" data-delay="0.2">Long-Term (5+ Yr)</h3>
+                            <div class="timeline-point hidden md:block md:absolute md:left-full md:transform md:-translate-x-1/2 md:top-1/2 md:-translate-y-1/2 animate-on-scroll" data-delay="0.3"></div>
+                        </div>
+                        <div class="md:w-1/2 md:pl-8 text-gray-700 relative">
+                            <div class="timeline-point md:hidden animate-on-scroll" data-delay="0.3"></div>
+                            <ul class="list-disc list-inside space-y-2 animate-on-scroll" data-delay="0.4">
+                                <li>Become a highly capitalized private corporation, a recognized blockchain contributor.</li>
+                                <li>Evaluate strategic benefits of becoming a publicly traded company.</li>
+                                <li>If public, implement a formal dividend distribution policy.</li>
+                                <li>Explore diversification into staking other prominent Proof-of-Stake assets.</li>
+                                <li>Contribute to the broader blockchain ecosystem through research and innovation.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="risks" class="py-20 bg-white">
+            <div class="container mx-auto px-6">
+                <div class="text-center mb-12 animate-on-scroll">
+                    <h2 class="text-3xl md:text-4xl font-bold text-gray-800">Fortifying the Future: Risk & Mitigation</h2>
+                    <p class="mt-4 text-lg text-gray-600 max-w-2xl mx-auto">Every venture involves inherent risks, and a robust strategy acknowledges and addresses them proactively. This section outlines the key challenges we've identified and our comprehensive mitigation plans. Click on each card to reveal our approach to safeguarding SYNTHERIA's future.</p>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                    <div class="risk-card animate-on-scroll" data-delay="0.1" style="perspective: 1000px;">
+                        <div class="risk-card-inner relative w-full h-64">
+                            <div class="risk-card-front">
+                                <div class="text-4xl mb-3 text-[#627EEA]">▝</div> <!-- Abstract icon -->
+                                <h3 class="font-bold text-xl">Market Risk</h3>
+                                <p class="text-gray-600">Volatility in ETH price and staking yields.</p>
+                                <span class="text-sm text-[#627EEA] font-semibold mt-4">Click to see mitigation</span>
+                            </div>
+                            <div class="risk-card-back">
+                                <h4 class="font-bold text-lg mb-2">Mitigation Plan</h4>
+                                <ul class="list-disc list-inside text-sm space-y-2">
+                                    <li>Focus on accumulating more ETH, as revenue is ETH-denominated.</li>
+                                    <li>Communicate long-term value over short-term price swings.</li>
+                                    <li>Future dividend policy to account for yield fluctuations.</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="risk-card animate-on-scroll" data-delay="0.2" style="perspective: 1000px;">
+                        <div class="risk-card-inner relative w-full h-64">
+                            <div class="risk-card-front">
+                                <div class="text-4xl mb-3 text-[#627EEA]">▨</div> <!-- Abstract icon -->
+                                <h3 class="font-bold text-xl">Operational Risk</h3>
+                                <p class="text-gray-600">Security breaches, slashing penalties, and downtime.</p>
+                                <span class="text-sm text-[#627EEA] font-semibold mt-4">Click to see mitigation</span>
+                            </div>
+                            <div class="risk-card-back">
+                                <h4 class="font-bold text-lg mb-2">Mitigation Plan</h4>
+                                <ul class="list-disc list-inside text-sm space-y-2">
+                                    <li>Multi-layer security: cold storage, HSMs.</li>
+                                    <li>Regular third-party security audits.</li>
+                                    <li>Redundant infrastructure to prevent downtime and slashing.</li>
+                                    <li>Slashing insurance/reserve fund.</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="risk-card animate-on-scroll" data-delay="0.3" style="perspective: 1000px;">
+                        <div class="risk-card-inner relative w-full h-64">
+                            <div class="risk-card-front">
+                                <div class="text-4xl mb-3 text-[#627EEA]">▤</div> <!-- Abstract icon -->
+                                <h3 class="font-bold text-xl">Regulatory Risk</h3>
+                                <p class="text-gray-600">Evolving laws and unclear tax treatment.</p>
+                                <span class="text-sm text-[#627EEA] font-semibold mt-4">Click to see mitigation</span>
+                            </div>
+                            <div class="risk-card-back">
+                                <h4 class="font-bold text-lg mb-2">Mitigation Plan</h4>
+                                <ul class="list-disc list-inside text-sm space-y-2">
+                                    <li>Proactive engagement with specialized crypto legal counsel.</li>
+                                    <li>Continuous monitoring of global regulations.</li>
+                                    <li>Engage expert tax advisors for compliance.</li>
+                                    <li>Maintain a flexible operational model.</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="contact" class="py-20">
+            <div class="container mx-auto px-6 text-center animate-on-scroll">
+                 <h2 class="text-3xl md:text-4xl font-bold text-gray-800">Join the Nexus: Connect with SYNTHERIA</h2>
+                 <p class="mt-4 text-lg text-gray-600 max-w-2xl mx-auto mb-8">SYNTHERIA is actively building its foundational ETH reserve. If our vision of a stable, independent, and secure revenue engine resonates with your strategic interests, we invite you to connect with us. Use the form below to initiate contact, and we'll respond promptly.</p>
+                 
+                 <div class="max-w-xl mx-auto bg-white p-8 rounded-lg shadow-md border border-gray-200 animate-on-scroll" data-delay="0.1">
+                    <form id="contactForm" class="space-y-4 text-left">
+                        <div>
+                            <label for="contactName" class="block text-sm font-medium text-gray-700">Your Name</label>
+                            <input type="text" id="contactName" name="name" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-[#627EEA] focus:border-[#627EEA] sm:text-sm" placeholder="John Doe">
+                        </div>
+                        <div>
+                            <label for="contactEmail" class="block text-sm font-medium text-gray-700">Your Email</label>
+                            <input type="email" id="contactEmail" name="email" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-[#627EEA] focus:border-[#627EEA] sm:text-sm" placeholder="you@example.com">
+                        </div>
+                        <div>
+                            <label for="contactSubject" class="block text-sm font-medium text-gray-700">Subject</label>
+                            <input type="text" id="contactSubject" name="subject" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-[#627EEA] focus:border-[#627EEA] sm:text-sm" placeholder="Investment Inquiry">
+                        </div>
+                        <div>
+                            <label for="contactMessage" class="block text-sm font-medium text-gray-700">Message</label>
+                            <textarea id="contactMessage" name="message" rows="5" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-[#627EEA] focus:border-[#627EEA] sm:text-sm" placeholder="I'd like to learn more about..."></textarea>
+                        </div>
+                        <button type="submit" id="sendEmailButton" class="w-full bg-[#627EEA] text-white text-lg font-semibold px-8 py-3 rounded-lg hover:bg-opacity-90 transition-colors shadow-md">Send Email</button>
+                        <p class="text-xs text-gray-500 mt-2">Note: Clicking "Send Email" will open your default email client with your message pre-filled.</p>
+                    </form>
+                 </div>
+            </div>
+        </section>
+    </main>
+    
+    <footer class="bg-gray-800 text-white py-8">
+        <div class="container mx-auto px-6 text-center">
+            <p>&copy; 2025 SYNTHERIA Corporation. All Rights Reserved.</p>
+            <p class="text-sm text-gray-400 mt-2">This is not an offer to sell securities. Information provided is for illustrative purposes only.</p>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const investmentSlider = document.getElementById('investmentSlider');
+            const ethPriceSlider = document.getElementById('ethPriceSlider');
+            const yieldSlider = document.getElementById('yieldSlider');
+
+            const investmentValue = document.getElementById('investmentValue');
+            const ethPriceValue = document.getElementById('ethPriceValue');
+            const yieldValue = document.getElementById('yieldValue');
+
+            const ethAcquiredEl = document.getElementById('ethAcquired');
+            const year1RevenueEl = document.getElementById('year1Revenue');
+            const year5RevenueEl = document.getElementById('year5Revenue');
+
+            let revenueChart;
+
+            const formatCurrency = (value) => new Intl.NumberFormat('en-CA', { style: 'currency', currency: 'CAD', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(value);
+
+            const calculateAndDisplay = () => {
+                const investment = parseFloat(investmentSlider.value);
+                const ethPrice = parseFloat(ethPriceSlider.value);
+                const annualYield = parseFloat(yieldSlider.value) / 100;
+
+                investmentValue.textContent = formatCurrency(investment);
+                ethPriceValue.textContent = formatCurrency(ethPrice);
+                yieldValue.textContent = `${(annualYield * 100).toFixed(1)}%`;
+                
+                const ethAcquired = investment / ethPrice;
+                ethAcquiredEl.textContent = `${ethAcquired.toFixed(2)} ETH`;
+
+                const annualRevenueData = [];
+                let currentStakedEth = ethAcquired;
+                const reinvestmentRate = 0.5; // Example reinvestment rate
+
+                for(let i = 0; i < 5; i++) {
+                    const annualRewardsEth = currentStakedEth * annualYield;
+                    const annualRevenueCAD = annualRewardsEth * ethPrice;
+                    annualRevenueData.push(annualRevenueCAD);
+                    
+                    const reinvestedEth = (annualRevenueCAD * reinvestmentRate) / ethPrice;
+                    currentStakedEth += reinvestedEth;
+                }
+
+                year1RevenueEl.textContent = formatCurrency(annualRevenueData[0]);
+                year5RevenueEl.textContent = formatCurrency(annualRevenueData[4]);
+                
+                updateChart(annualRevenueData);
+            };
+
+            const updateChart = (data) => {
+                const chartLabels = ['Year 1', 'Year 2', 'Year 3', 'Year 4', 'Year 5'];
+                if (revenueChart) {
+                    revenueChart.data.datasets[0].data = data;
+                    revenueChart.update();
+                } else {
+                    const ctx = document.getElementById('revenueChart').getContext('2d');
+                    revenueChart = new Chart(ctx, {
+                        type: 'bar',
+                        data: {
+                            labels: chartLabels,
+                            datasets: [{
+                                label: 'Projected Annual Revenue (CAD)',
+                                data: data,
+                                backgroundColor: '#627EEA',
+                                borderColor: '#4A5FCF', /* Secondary blue for border */
+                                borderWidth: 1,
+                                borderRadius: 5,
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                legend: {
+                                    display: false
+                                },
+                                tooltip: {
+                                    callbacks: {
+                                        label: function(context) {
+                                            return `Revenue: ${formatCurrency(context.parsed.y)}`;
+                                        }
+                                    }
+                                }
+                            },
+                            scales: {
+                                y: {
+                                    beginAtZero: true,
+                                    ticks: {
+                                        callback: function(value) {
+                                            return formatCurrency(value);
+                                        }
+                                    }
+                                },
+                                x: {
+                                    grid: {
+                                        display: false
+                                    }
+                                }
+                            }
+                        }
+                    });
+                }
+            };
+            
+            [investmentSlider, ethPriceSlider, yieldSlider].forEach(slider => {
+                slider.addEventListener('input', calculateAndDisplay);
+            });
+
+            calculateAndDisplay();
+
+            // Mobile menu toggle
+            const mobileMenuButton = document.getElementById('mobile-menu-button');
+            const mobileMenu = document.getElementById('mobile-menu');
+            mobileMenuButton.addEventListener('click', () => {
+                mobileMenu.classList.toggle('hidden');
+            });
+            mobileMenu.querySelectorAll('a').forEach(link => {
+                link.addEventListener('click', () => {
+                    mobileMenu.classList.add('hidden'); // Hide menu after click
+                });
+            });
+
+            // Risk card flip
+            const riskCards = document.querySelectorAll('.risk-card');
+            riskCards.forEach(card => {
+                card.addEventListener('click', () => {
+                    card.classList.toggle('flipped');
+                });
+            });
+
+            // Scroll-triggered animations (Intersection Observer)
+            const animateElements = document.querySelectorAll('.animate-on-scroll');
+            const observerOptions = {
+                root: null,
+                rootMargin: '0px',
+                threshold: 0.1 // Triggers when 10% of the element is visible
+            };
+
+            const observerCallback = (entries, observer) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        const delay = parseFloat(entry.target.dataset.delay || '0');
+                        setTimeout(() => {
+                            entry.target.classList.add('is-visible');
+                        }, delay * 1000);
+                        // Removed unobserve, allowing elements to animate again when scrolled into view
+                    } else {
+                        // Remove is-visible when not intersecting to allow re-animation on scroll up
+                        entry.target.classList.remove('is-visible');
+                    }
+                });
+            };
+
+            const sectionObserver = new IntersectionObserver(observerCallback, observerOptions);
+            animateElements.forEach(el => sectionObserver.observe(el));
+
+            // Specific observer for timeline line animation (this remains one-time growth)
+            const timelineLine = document.querySelector('.timeline-line-container');
+            if (timelineLine) {
+                const timelineLineObserver = new IntersectionObserver((entries) => {
+                    entries.forEach(entry => {
+                        if (entry.isIntersecting) {
+                            entry.target.classList.add('is-visible');
+                            timelineLineObserver.unobserve(entry.target); // Still unobserve as it's a "growth" animation
+                        }
+                    });
+                }, { threshold: 0.2 });
+                timelineLineObserver.observe(timelineLine);
+            }
+
+            // Header navigation active state on scroll
+            const navLinks = document.querySelectorAll('.nav-link');
+            const sections = document.querySelectorAll('main section');
+            const headerHeight = document.getElementById('header').offsetHeight;
+
+            const navObserver = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        navLinks.forEach(link => {
+                            const href = link.getAttribute('href');
+                            link.classList.toggle('active', href.substring(1) === entry.target.id);
+                        });
+                    }
+                });
+            }, { rootMargin: `-${headerHeight}px 0px 0px 0px`, threshold: 0.4 }); 
+            
+            sections.forEach(section => {
+                navObserver.observe(section);
+            });
+
+            // Hero section background parallax-like effect on mouse move
+            const heroSection = document.getElementById('hero');
+            const heroOrbs = document.querySelectorAll('.hero-background-element');
+
+            // Mouse move effect for orbs
+            heroSection.addEventListener('mousemove', (e) => {
+                const rect = heroSection.getBoundingClientRect();
+                const centerX = rect.left + rect.width / 2;
+                const centerY = rect.top + rect.height / 2;
+
+                heroOrbs.forEach((orb, index) => {
+                    const intensity = (index + 1) * 2; 
+                    const moveX = (e.clientX - centerX) / (rect.width / 2) * intensity;
+                    const moveY = (e.clientY - centerY) / (rect.height / 2) * intensity;
+                    
+                    orb.style.transform = `translate(-50%, -50%) translate(${moveX}px, ${moveY}px) rotate(0deg)`;
+                });
+            });
+
+            // Reset parallax on mouse leave
+            heroSection.addEventListener('mouseleave', () => {
+                heroOrbs.forEach(orb => {
+                    orb.style.transform = `translate(-50%, -50%) rotate(0deg)`;
+                });
+            });
+
+            // Handle Contact Form submission
+            const contactForm = document.getElementById('contactForm');
+            const sendEmailButton = document.getElementById('sendEmailButton');
+
+            sendEmailButton.addEventListener('click', (event) => {
+                event.preventDefault(); // Prevent default form submission
+
+                const name = document.getElementById('contactName').value;
+                const email = document.getElementById('contactEmail').value;
+                const subject = document.getElementById('contactSubject').value;
+                const message = document.getElementById('contactMessage').value;
+
+                const recipient = "syntheriacorporation@gmail.com";
+                const mailtoSubject = encodeURIComponent(`Inquiry from ${name}: ${subject}`);
+                const mailtoBody = encodeURIComponent(`Name: ${name}\nEmail: ${email}\n\nMessage:\n${message}`);
+
+                const mailtoLink = `mailto:${recipient}?subject=${mailtoSubject}&body=${mailtoBody}`;
+                window.location.href = mailtoLink;
+            });
+        });
+    </script>
+</body>
+</html>
